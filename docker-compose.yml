@@ -1,0 +1,44 @@
+version: '2'
+networks:
+  micronet:
+services:
+  eureka:
+    image: springcloud/eureka
+    container_name: eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - micronet
+
+  microservice1:
+    image: antifragilesoftware/simple-boot-microservice-eureka
+    container_name: microservice1
+    ports:
+     - "8080:8080"
+    depends_on:
+     - eureka
+    networks:
+      - micronet
+    command: ["java","--eureka.client.serviceUrl.defaultZone=http://eureka:8761/eureka/","--eureka.instance.prefer-ip-address=true","-Djava.security.egd=file:/dev/./urandom","-jar","/microservice.jar"]
+
+  microservice2:
+    image: antifragilesoftware/simple-boot-microservice-eureka
+    container_name: microservice2
+    ports:
+     - "8081:8080"
+    depends_on:
+     - eureka
+    networks:
+      - micronet
+    command: ["java","--eureka.client.serviceUrl.defaultZone=http://eureka:8761/eureka/","--eureka.instance.prefer-ip-address=true","-Djava.security.egd=file:/dev/./urandom","-jar","/microservice.jar"]
+
+  microserviceconsumer:
+    image: antifragilesoftware/simple-boot-microservice-consumer-eureka
+    container_name: microserviceconsumer
+    ports:
+     - "8090:8080"
+    depends_on:
+     - eureka
+    networks:
+      - micronet
+    command: ["java","--eureka.client.serviceUrl.defaultZone=http://eureka:8761/eureka/","--eureka.instance.prefer-ip-address=true","-Djava.security.egd=file:/dev/./urandom","-jar","/microservice.jar"]
